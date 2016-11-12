@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <title>Hello, World! example for mxGraph</title>
+   <title>Starting point Foodnetwork Graph</title>
    {% load static %} 
    <!-- Sets the basepath for the library if not in same directory -->
    <script type="text/javascript">
@@ -24,7 +24,7 @@
 	// globally unique for the lifetime of the graph model.
 	var requestId = 0;
 		
-	function main(container)
+	function main(container, infocontainer)
 	{
 		// Checks if browser is supported
 		if (!mxClient.isBrowserSupported())
@@ -232,7 +232,7 @@
 </head>
 
 <!-- Page passes the container for the graph to the program -->
-<body onload="main(document.getElementById('graphContainer'))">
+<body onload="main(document.getElementById('graphContainer'), document.getElementById('infoContainer'))">
 
     <!-- Creates a container for the graph with a grid wallpaper -->
     <div id="graphContainer"
@@ -240,9 +240,19 @@
         position:fixed;
         left:0;
         top:0;
-        width:100%;
+        width:75%;
         height:100%;
         background:url( '{% static 'graphview/img/grid.gif' %}' )">
     </div>
+    <div id="infoContainer"
+      style="overflow:hidden;
+        position:fixed;
+        right:0;
+        top:0;
+        width:25%;
+        height:100%;
+        background:url( '{% static 'graphview/img/infoBG.jpg' %}' )">
+    </div>
+
 </body>
 </html>
