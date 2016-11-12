@@ -10,9 +10,12 @@ class Ingredient(models.Model):
         ('BE', 'Beef'),
         ('CH', 'Chicken'),
         ('PO', 'Pork'),
+        ('FI', 'Fish'),
         ('MO', 'Meat_other'),
         ('SA', 'Sauce'),
         ('SP', 'Spice'),
+        ('DI', 'Diary'),
+        ('NU', 'Nuts'),
     )
     ingredient_name = models.CharField(max_length = 200)
     ingredient_type = models.CharField(
