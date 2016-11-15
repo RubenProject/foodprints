@@ -18,7 +18,7 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^', include('home.urls')),
-    url(r'^graphview/', include('graphview.urls')),
+    url(r'^graphview/', include('graphview.urls', namespace="graphview")),
     url(r'^polls/', include('polls.urls', namespace="polls")),
     url(r'^admin/', include(admin.site.urls)),
 ]
