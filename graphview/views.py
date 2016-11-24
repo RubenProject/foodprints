@@ -4,6 +4,15 @@ from graphview.models import Recipe, Ingredient
 from django.core.urlresolvers import reverse
 import random
 
+def all_recipes(request):
+    recipe_list = get_list_or_404(Recipe.objects.all().values_list('recipe_name'))
+    recipe_str_list = []
+    for recipe in recipe_list:
+        recipe_str_list.append(''.join(recipe[0]).encode("ascii"))
+    print recipe_str_list
+    return render(request, 'graphview/list_all.html', {
+        'recipe_list': recipe_str_list,
+        })
 
 def random_recipe(request):
     recipe_list = get_list_or_404(Recipe.objects.all())

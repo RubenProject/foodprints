@@ -1,0 +1,4 @@
+<h1>All recipes</h1></br>
+{% for recipe in recipe_list %}
+<a href= "{% url 'graphview:view' recipe %}">{{ recipe }}</a> </br>
+{% endfor %}
