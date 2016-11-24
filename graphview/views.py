@@ -2,7 +2,26 @@ from django.shortcuts import render, get_list_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from graphview.models import Recipe, Ingredient
 from django.core.urlresolvers import reverse
+from django.utils import timezone
 import random
+
+def add_recipe(request):
+    error_text = ""
+    return render(request, 'graphview/add_recipe.html', {
+        'error_text': error_text
+        })
+
+def add_recipe_to_database(request):
+    recipe_name = request.POST['recipe_name']
+    color = request.POST['color']
+    country_of_origin = request.POST['country_of_origin']
+    ingredient1 = request.POST['ingredient1']
+    new_recipe = Recipe(recipe_name=recipe_name, color=color, country_of_origin=country_of_origin)
+    new_recipe.save()
+    #if ingredient already exists add to recipe
+    #else add ingredient in database
+    #possible needs some extra user input :/
+    return HttpResponseRedirect(reverse(request, 'graphview:add_recipe'))
 
 def all_recipes(request):
     recipe_list = get_list_or_404(Recipe.objects.all().values_list('recipe_name'))

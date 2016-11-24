@@ -1,0 +1,16 @@
+<h1>Add a food of your own!</h1>
+
+<form action="{% url 'graphview:add_recipe_to_database' %}" method='post'>
+    {% csrf_token %}
+    <p>Name of the food:</p><br/>
+    <input type="text" name="recipe_name" id="recipe_name_field" /><br/>
+    <p>Color of the food:</p><br/>
+    <input type="text" name="color" id="color" /><br/>
+    <p>Country of origin of the food:</p><br/>
+    <input type="text" name="country_of_origin" id="country_of_origin" /><br/>
+    <br>
+    <p>Ingredient 1 in dish:</p><br/>
+    <input type="text" name="ingredient1" id="ingredient1" /><br/>
+    <p>TODO: Find some way to dynamically add more text form boxes when this last box is filled in</p>
+    <input type="submit" value="Add food" />
+</form>
