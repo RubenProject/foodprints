@@ -1,9 +1,9 @@
 <h1>{{ question }}</h1>
 <form action="{% url 'graphview:answer' question_num %}" method="post">
     {% csrf_token %}
-    {% for recipe in recipe_list %}
-        <input type="radio" name="recipe" id="recipe{{ forloop.counter }}" value="{{ recipe }}" />
-        <label for="recipe{{ forloop.counter }}">{{ recipe }}</label><br />
+    {% for option in option_list %}
+        <input type="radio" name="answer" id="answer{{ forloop.counter }}" value="{{ option }}" />
+        <label for="option{{ forloop.counter }}">{{ option }}</label><br />
     {% endfor %}
     <input type="submit" value="answer" />
 </form>
