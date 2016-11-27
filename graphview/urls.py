@@ -3,6 +3,7 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
+    url(r'^get_data/$', views.get_data, name='get_data'),
     url(r'^add_recipe/$', views.add_recipe, name='add_recipe'),
     url(r'^add_recipe_to_database/$', views.add_recipe, name='add_recipe_to_database'),
     url(r'^all_recipes/$', views.all_recipes, name='all_recipes'),

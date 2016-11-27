@@ -1,9 +1,61 @@
-from django.shortcuts import render, get_list_or_404
+from django.shortcuts import render, get_list_or_404, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from graphview.models import Recipe, Ingredient
 from django.core.urlresolvers import reverse
 from django.utils import timezone
+import xml.etree.cElementTree as ET
 import random
+
+def get_data(request):
+    limit = 5
+    if ('requestID' in request.session):
+        request.session['requestID'] += 1
+    else:
+        request.session['requestID'] = 1
+    fields = ['color', 'country_of_origin']
+    recipe = get_object_or_404(Recipe, recipe_name=request.META['HTTP_RECIPE'])
+    suggestions = Recipe.objects.none()
+    qs = Recipe.objects.exclude(id=recipe.id) 
+
+    for field in fields:
+        val = getattr(recipe, field)
+        if val:
+            d = {field: val}
+            qs_ = qs.filter(**d)
+            if qs_:
+                suggestions = qs_
+
+    count = suggestions.count()
+    if count == 0:
+        suggestions = qs.order_by('?')
+    elif count < limit:
+        suggestions = suggestions | qs.exclude(id__in=suggestions.values_list('id', flat=True)).order_by('?')[:limit-count]
+    print suggestions
+
+    cwidth = "60"
+    cheight = "40"
+    mxGraphModel = ET.Element("mxGraphModel")
+    root = ET.SubElement(mxGraphModel, "root")
+
+    ET.SubElement(root, "mxCell", id="0")
+    ET.SubElement(root, "mxCell", id="1", parent="0")
+    
+    last_mxCell = ET.SubElement(root, "mxCell", id="2", value=recipe.recipe_name, vertex="1", parent="1")
+    ET.SubElement(last_mxCell, "mxGeometry", width=cwidth, height=cheight, as_="geometry")
+
+    for i, suggestion in enumerate(suggestions):
+        last_mxCell = ET.SubElement(root, "mxCell", id=suggestion.recipe_name, value=suggestion.recipe_name, vertex="1", parent="1")
+        ET.SubElement(last_mxCell, "mxGeometry", width=cwidth, height=cheight, as_="geometry")
+        last_mxCell = ET.SubElement(root, "mxCell", id=str(i+2), value=str(i+2), edge="1", parent="1", source="2", target=suggestion.recipe_name)
+        ET.SubElement(last_mxCell, "mxGeometry", relative="1", as_="geometry")
+
+
+    
+    xml = ET.tostring(mxGraphModel, "utf-8").replace("_", "")
+
+    return HttpResponse(xml)
+    #pray everything works
+    #return HttpResponse("""<mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/><mxCell id="2" value="Dummy" vertex="1" parent="1"><mxGeometry width="60" height="40" as="geometry"/></mxCell><mxCell id="11-0" value="11-0" vertex="1" parent="1"><mxGeometry width="60" height="40" as="geometry"/></mxCell><mxCell id="3" value="Link 0" edge="1" parent="1" source="2" target="11-0"><mxGeometry relative="1" as="geometry"/></mxCell><mxCell id="11-1" value="11-1" vertex="1" parent="1"><mxGeometry width="60" height="40" as="geometry"/></mxCell><mxCell id="4" value="Link 1" edge="1" parent="1" source="2" target="11-1"><mxGeometry relative="1" as="geometry"/></mxCell><mxCell id="11-2" value="11-2" vertex="1" parent="1"><mxGeometry width="60" height="40" as="geometry"/></mxCell><mxCell id="5" value="Link 2" edge="1" parent="1" source="2" target="11-2"><mxGeometry relative="1" as="geometry"/></mxCell><mxCell id="11-3" value="11-3" vertex="1" parent="1"><mxGeometry width="60" height="40" as="geometry"/></mxCell><mxCell id="6" value="Link 3" edge="1" parent="1" source="2" target="11-3"><mxGeometry relative="1" as="geometry"/></mxCell><mxCell id="11-4" value="11-4" vertex="1" parent="1"><mxGeometry width="60" height="40" as="geometry"/></mxCell><mxCell id="7" value="Link 4" edge="1" parent="1" source="2" target="11-4"><mxGeometry relative="1" as="geometry"/></mxCell><mxCell id="11-5" value="11-5" vertex="1" parent="1"><mxGeometry width="60" height="40" as="geometry"/></mxCell><mxCell id="8" value="Link 5" edge="1" parent="1" source="2" target="11-5"><mxGeometry relative="1" as="geometry"/></mxCell></root></mxGraphModel>""")
 
 def add_recipe(request):
     error_text = ""
@@ -17,7 +69,7 @@ def add_recipe_to_database(request):
     country_of_origin = request.POST['country_of_origin']
     ingredient1 = request.POST['ingredient1']
     new_recipe = Recipe(recipe_name=recipe_name, color=color, country_of_origin=country_of_origin)
-    new_recipe.save()
+    #new_recipe.save()
     #if ingredient already exists add to recipe
     #else add ingredient in database
     #possible needs some extra user input :/
@@ -28,7 +80,6 @@ def all_recipes(request):
     recipe_str_list = []
     for recipe in recipe_list:
         recipe_str_list.append(''.join(recipe[0]).encode("ascii"))
-    print recipe_str_list
     return render(request, 'graphview/list_all.html', {
         'recipe_list': recipe_str_list,
         })
@@ -39,8 +90,10 @@ def random_recipe(request):
     return HttpResponseRedirect(reverse('graphview:view', args=(recipe,)))
 
 def view(request, recipe):
-    return render(request, 'graphview/view.html')
-
+    return render(request, 'graphview/view.html', {
+        'focusedNode': recipe,
+        })
+    
 def question(request, question_num):
     if int(question_num) == 1:
         color_list = get_list_or_404(Recipe.objects.order_by('color').values_list('color').distinct())
