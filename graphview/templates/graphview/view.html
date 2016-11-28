@@ -122,6 +122,7 @@
             xmlhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     var xml = this.responseText;
+                    console.log(xml);
                     var doc = mxUtils.parseXml(xml);
                     var dec = new mxCodec(doc);
                     var model = dec.decode(doc.documentElement);
@@ -138,8 +139,20 @@
                         }
                     }
 
+
                     // Merges the response model with the client model
                     graph.getModel().mergeChildren(model.getRoot().getChildAt(0), parent);
+
+                    for (key in graph.getModel().cells)
+                    {
+                        var tmp = graph.getModel().getCell(key);
+                        
+                        if (tmp != cell &&
+                            graph.getModel().isVertex(tmp))
+                        {
+                            console.log(tmp.value);
+                        }
+                    }
 
                     // Moves the given cell to the center
                     var geo = graph.getModel().getGeometry(cell);
@@ -206,7 +219,6 @@
             xmlhttp.open("GET", url, false);
             xmlhttp.setRequestHeader("recipe", cell.value);
             xmlhttp.send();
-            //var xml = server(cell.id);
 		}
 	};
 

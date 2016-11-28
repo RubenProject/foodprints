@@ -12,6 +12,9 @@ def get_data(request):
         request.session['requestID'] += 1
     else:
         request.session['requestID'] = 1
+    reqID = request.session['requestID']
+    reqID = str(reqID) + '-'
+    print reqID
     fields = ['color', 'country_of_origin']
     recipe = get_object_or_404(Recipe, recipe_name=request.META['HTTP_RECIPE'])
     suggestions = Recipe.objects.none()
@@ -40,13 +43,13 @@ def get_data(request):
     ET.SubElement(root, "mxCell", id="0")
     ET.SubElement(root, "mxCell", id="1", parent="0")
     
-    last_mxCell = ET.SubElement(root, "mxCell", id="2", value=recipe.recipe_name, vertex="1", parent="1")
+    last_mxCell = ET.SubElement(root, "mxCell", id="2", value="dummy", vertex="1", parent="1")
     ET.SubElement(last_mxCell, "mxGeometry", width=cwidth, height=cheight, as_="geometry")
 
     for i, suggestion in enumerate(suggestions):
-        last_mxCell = ET.SubElement(root, "mxCell", id=suggestion.recipe_name, value=suggestion.recipe_name, vertex="1", parent="1")
+        last_mxCell = ET.SubElement(root, "mxCell", id=reqID + suggestion.recipe_name, value=suggestion.recipe_name, vertex="1", parent="1")
         ET.SubElement(last_mxCell, "mxGeometry", width=cwidth, height=cheight, as_="geometry")
-        last_mxCell = ET.SubElement(root, "mxCell", id=str(i+2), value=str(i+2), edge="1", parent="1", source="2", target=suggestion.recipe_name)
+        last_mxCell = ET.SubElement(root, "mxCell", id=str(i+3), value=str(i + 1), edge="1", parent="1", source="2", target=reqID + suggestion.recipe_name)
         ET.SubElement(last_mxCell, "mxGeometry", relative="1", as_="geometry")
 
 
