@@ -21,13 +21,6 @@
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
 
-   <!-- Loads and initializes the library -->
-   <script type="text/javascript" src="{% static "graphview/lib/mxgraph/src/js/mxClient.js" %}" ></script>
-
-   <!-- Example code -->
-   <script type="text/javascript">
-    	var focusedNode = "{{ focusedNode }}";
-   </script>
    <style type="text/css">
        html, body {
            font: 11pt arial;
@@ -144,6 +137,7 @@
                 alert(err);
             }
         }
+
         function removeEdge() {
             try {
                 edges.remove({id: document.getElementById('edge-id').value});
@@ -153,9 +147,7 @@
             }
         }
 
-        function draw() {
-            // create an array with nodes
-            nodes = new vis.DataSet();
+        function updateGraph(graphArray){
             nodes.on('*', function () {
                 document.getElementById('nodes').innerHTML = JSON.stringify(nodes.get(), null, 4);
             });
@@ -187,14 +179,32 @@
             };
             var options = {};
             network = new vis.Network(container, data, options);
+        }
 
+        function main() {
+            // create an array with nodes
+            var focusedNode = "{{ focusedNode }}";
+            nodes = new vis.DataSet();
+            var xmlhttp = new XMLHttpRequest();
+            var url = "{% url 'graphview:get_data' %}";
+
+            xmlhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    alert(this.responseText);
+                    //var myArr = JSON.parse(this.responseText);
+                    updateGraph(this.responseTest);
+                }
+            };
+            xmlhttp.open("GET", url, true);
+            xmlhttp.setRequestHeader("recipe", focusedNode);
+            xmlhttp.send();
         }
 
     </script>
 </head>
 
 <!-- Page passes the container for the graph to the program -->
-<body onload="draw();">
+<body onload="main();">
     <!-- Navigation -->
     <nav id="mainNav" class="navbar navbar-default navbar-fixed-top navbar-custom">
         <div class="container">
