@@ -21,254 +21,180 @@
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
 
-   <!-- Sets the basepath for the library if not in same directory -->
-   <script type="text/javascript">
-      mxBasePath = '{% static 'graphview/lib/mxgraph/src' %}';
-   </script>
-
    <!-- Loads and initializes the library -->
    <script type="text/javascript" src="{% static "graphview/lib/mxgraph/src/js/mxClient.js" %}" ></script>
 
    <!-- Example code -->
    <script type="text/javascript">
-    // Program starts here. Creates a sample graph in the
-	// DOM node with the specified ID. This function is invoked
-	// from the onLoad event handler of the document (see below).
-		
-	// Global variable to make sure each cell in a response has
-	// a unique ID throughout the complete life of the program,
-	// in a real-life setup each cell should have an external
-	// ID on the business object or else the cell ID should be
-	// globally unique for the lifetime of the graph model.
-	var requestId = 0;
-    var focusedNode = "{{ focusedNode }}";
-
-		
-	function main(container, infocontainer)
-	{
-		// Checks if browser is supported
-		if (!mxClient.isBrowserSupported())
-		{
-			// Displays an error message if the browser is
-			// not supported.
-			mxUtils.error('Browser is not supported!', 200, false);
-		}
-		else
-		{
-			// Speedup the animation
-			mxText.prototype.enableBoundingBox = false;
-			
-			// Creates the graph inside the given container
-			var graph = new mxGraph(container);
-			
-			// Disables all built-in interactions
-			graph.setEnabled(false);
-
-            // Handles clicks on cells
-			graph.addListener(mxEvent.CLICK, function(sender, evt)
-			{
-				var cell = evt.getProperty('cell');
-
-				if (cell != null)
-				{
-                    focusedNode = cell.value;
-					load(graph, cell);
-				}
-			});
-
-			// Changes the default vertex style in-place
-			var style = graph.getStylesheet().getDefaultVertexStyle();
-			style[mxConstants.STYLE_SHAPE] = mxConstants.SHAPE_ELLIPSE;
-			style[mxConstants.STYLE_PERIMETER] = mxPerimeter.EllipsePerimeter;
-			style[mxConstants.STYLE_GRADIENTCOLOR] = 'white';
-								
-			// Gets the default parent for inserting new cells. This
-			// is normally the first child of the root (ie. layer 0).
-			var parent = graph.getDefaultParent();
-
-			var cx = graph.container.clientWidth / 2;
-			var cy = graph.container.clientHeight / 2;
-				
-			var cell = graph.insertVertex(parent, focusedNode, focusedNode, cx - 20, cy - 15, 60, 40);
-
-			// Animates the changes in the graph model
-			graph.getModel().addListener(mxEvent.CHANGE, function(sender, evt)
-			{
-				var changes = evt.getProperty('edit').changes;
-				mxEffects.animateChanges(graph, changes);
-			});
-
-			load(graph, cell);
-		}
-	};
-
-	// Loads the links for the given cell into the given graph
-	// by requesting the respective data in the server-side
-	// (implemented for this demo using the server-function)
-	function load(graph, cell)
-	{
-		if (graph.getModel().isVertex(cell))
-		{
-			var cx = graph.container.clientWidth / 2;
-			var cy = graph.container.clientHeight / 2;
-			
-			// Gets the default parent for inserting new cells. This
-			// is normally the first child of the root (ie. layer 0).
-			var parent = graph.getDefaultParent();
-
-			// Adds cells to the model in a single step
-			graph.getModel().beginUpdate();
-            var xmlhttp = new XMLHttpRequest();
-            xmlhttp.onreadystatechange = function() {
-                if (this.readyState == 4 && this.status == 200) {
-                    var xml = this.responseText;
-                    console.log(xml);
-                    var doc = mxUtils.parseXml(xml);
-                    var dec = new mxCodec(doc);
-                    var model = dec.decode(doc.documentElement);
-
-                    // Removes all cells which are not in the response
-                    for (var key in graph.getModel().cells)
-                    {
-                        var tmp = graph.getModel().getCell(key);
-                        
-                        if (tmp != cell &&
-                            graph.getModel().isVertex(tmp))
-                        {
-                            graph.removeCells([tmp]);
-                        }
-                    }
-
-
-                    // Merges the response model with the client model
-                    graph.getModel().mergeChildren(model.getRoot().getChildAt(0), parent);
-
-                    for (key in graph.getModel().cells)
-                    {
-                        var tmp = graph.getModel().getCell(key);
-                        
-                        if (tmp != cell &&
-                            graph.getModel().isVertex(tmp))
-                        {
-                            console.log(tmp.value);
-                        }
-                    }
-
-                    // Moves the given cell to the center
-                    var geo = graph.getModel().getGeometry(cell);
-
-                    if (geo != null)
-                    {
-                        geo = geo.clone();
-                        geo.x = cx - geo.width / 2;
-                        geo.y = cy - geo.height / 2;
-
-                        graph.getModel().setGeometry(cell, geo);
-                    }
-
-                    // Creates a list of the new vertices, if there is more
-                    // than the center vertex which might have existed
-                    // previously, then this needs to be changed to analyze
-                    // the target model before calling mergeChildren above
-                    var vertices = [];
-                        
-                    for (var key in graph.getModel().cells)
-                    {
-                        var tmp = graph.getModel().getCell(key);
-                            
-                        if (tmp != cell && model.isVertex(tmp))
-                        {
-                            vertices.push(tmp);
-
-                            // Changes the initial location "in-place"
-                            // to get a nice animation effect from the
-                            // center to the radius of the circle
-                            var geo = model.getGeometry(tmp);
-
-                            if (geo != null)
-                            {
-                                geo.x = cx - geo.width / 2;
-                                geo.y = cy - geo.height / 2;
-                            }
-                        }
-                    }
-                        
-                    // Arranges the response in a circle
-                    var cellCount = vertices.length;
-                    var phi = 2 * Math.PI / cellCount;
-                    var r = Math.min(graph.container.clientWidth / 4,
-                            graph.container.clientHeight / 4);
-                        
-                    for (var i = 0; i < cellCount; i++)
-                    {
-                        var geo = graph.getModel().getGeometry(vertices[i]);
-                            
-                            if (geo != null)
-                            {
-                                geo = geo.clone();
-                                geo.x += r * Math.sin(i * phi);
-                                geo.y += r * Math.cos(i * phi);
-
-                                graph.getModel().setGeometry(vertices[i], geo);
-                            }
-                    }
-                }
-            graph.getModel().endUpdate();
-            }
-            var url = "{% url 'graphview:get_data' %}";
-            xmlhttp.open("GET", url, false);
-            xmlhttp.setRequestHeader("recipe", cell.value);
-            xmlhttp.send();
-		}
-	};
-
-	// Simulates the existence of a server that can crawl the
-	// big graph with a certain depth and create a graph model
-	// for the traversed cells, which is then sent to the client
-	function server(cellId)
-	{
-		// Increments the request ID as a prefix for the cell IDs
-		requestId++;
-
-		// Creates a local graph with no display
-		var graph = new mxGraph();
-			
-		// Gets the default parent for inserting new cells. This
-		// is normally the first child of the root (ie. layer 0).
-		var parent = graph.getDefaultParent();
-
-		// Adds cells to the model in a single step
-		graph.getModel().beginUpdate();
-		try
-		{
-			var v0 = graph.insertVertex(parent, cellId, 'Dummy', 0, 0, 60, 40);
-			var cellCount = parseInt(Math.random() * 16) + 4;
-
-			// Creates the random links and cells for the response
-			for (var i = 0; i < cellCount; i++)
-			{
-				var id = requestId + '-' + i;
-				var v = graph.insertVertex(parent, id, id, 0, 0, 60, 40);
-				var e = graph.insertEdge(parent, null, 'Link ' + i, v0, v);
-			}
-		}
-		finally
-		{
-			// Updates the display
-			graph.getModel().endUpdate();
-		}
-
-		var enc = new mxCodec();
-		var node = enc.encode(graph.getModel());
-			
-		return mxUtils.getXml(node);
-	};
-      
+    	var focusedNode = "{{ focusedNode }}";
    </script>
+   <style type="text/css">
+       html, body {
+           font: 11pt arial;
+       }
+
+       h1 {
+           font-size: 150%;
+           margin: 5px 0;
+       }
+
+       h2 {
+           font-size: 100%;
+           margin: 5px 0;
+       }
+
+       table.view {
+           width: 100%;
+       }
+
+       table td {
+           vertical-align: top;
+       }
+
+       table table {
+           background-color: #f5f5f5;
+           border: 1px solid #e5e5e5;
+       }
+
+       table table td {
+           vertical-align: middle;
+       }
+
+       input[type=text], pre {
+           border: 1px solid lightgray;
+       }
+
+       pre {
+           margin: 0;
+           padding: 5px;
+           font-size: 10pt;
+       }
+
+       #network {
+           width: 100%;
+           height: 400px;
+           border: 1px solid lightgray;
+       }
+    </style>
+
+    <script type="text/javascript" src="{% static "graphview/lib/vis-4.17.0/dist/vis.js" %}"></script>
+    <link href="{% static "graphview/lib/vis-4.17.0/dist/vis-network.min.css" %}" rel="stylesheet" type="text/css"/>
+
+    <script type="text/javascript">
+        var nodes, edges, network;
+
+        // convenience method to stringify a JSON object
+        function toJSON(obj) {
+            return JSON.stringify(obj, null, 4);
+        }
+
+        function addNode() {
+            try {
+                nodes.add({
+                    id: document.getElementById('node-id').value,
+                    label: document.getElementById('node-label').value
+                });
+            }
+            catch (err) {
+                alert(err);
+            }
+        }
+
+        function updateNode() {
+            try {
+                nodes.update({
+                    id: document.getElementById('node-id').value,
+                    label: document.getElementById('node-label').value
+                });
+            }
+            catch (err) {
+                alert(err);
+            }
+        }
+        function removeNode() {
+            try {
+                nodes.remove({id: document.getElementById('node-id').value});
+            }
+            catch (err) {
+                alert(err);
+            }
+        }
+
+        function addEdge() {
+            try {
+                edges.add({
+                    id: document.getElementById('edge-id').value,
+                    from: document.getElementById('edge-from').value,
+                    to: document.getElementById('edge-to').value
+                });
+            }
+            catch (err) {
+                alert(err);
+            }
+        }
+        function updateEdge() {
+            try {
+                edges.update({
+                    id: document.getElementById('edge-id').value,
+                    from: document.getElementById('edge-from').value,
+                    to: document.getElementById('edge-to').value
+                });
+            }
+            catch (err) {
+                alert(err);
+            }
+        }
+        function removeEdge() {
+            try {
+                edges.remove({id: document.getElementById('edge-id').value});
+            }
+            catch (err) {
+                alert(err);
+            }
+        }
+
+        function draw() {
+            // create an array with nodes
+            nodes = new vis.DataSet();
+            nodes.on('*', function () {
+                document.getElementById('nodes').innerHTML = JSON.stringify(nodes.get(), null, 4);
+            });
+            nodes.add([
+                {id: '1', label: 'Node 1'},
+                {id: '2', label: 'Node 2'},
+                {id: '3', label: 'Node 3'},
+                {id: '4', label: 'Node 4'},
+                {id: '5', label: 'Node 5'}
+            ]);
+
+            // create an array with edges
+            edges = new vis.DataSet();
+            edges.on('*', function () {
+                document.getElementById('edges').innerHTML = JSON.stringify(edges.get(), null, 4);
+            });
+            edges.add([
+                {id: '1', from: '1', to: '2'},
+                {id: '2', from: '1', to: '3'},
+                {id: '3', from: '2', to: '4'},
+                {id: '4', from: '2', to: '5'}
+            ]);
+
+            // create a network
+            var container = document.getElementById('network');
+            var data = {
+                nodes: nodes,
+                edges: edges
+            };
+            var options = {};
+            network = new vis.Network(container, data, options);
+
+        }
+
+    </script>
 </head>
 
 <!-- Page passes the container for the graph to the program -->
-<body onload="main(document.getElementById('graphContainer'), document.getElementById('infoContainer'))">
+<body onload="draw();">
     <!-- Navigation -->
     <nav id="mainNav" class="navbar navbar-default navbar-fixed-top navbar-custom">
         <div class="container">
@@ -282,57 +208,128 @@
         </div>
         <!-- /.container-fluid -->
     </nav>
+    <div style="padding-top: 65px;">
+        <p>
+        This example demonstrates dynamically adding, updating and removing nodes
+        and edges using a DataSet.
+        </p>
+        <h1>Adjust</h1>
+        <table>
+            <tr>
+                <td>
+                    <h2>Node</h2>
+                    <table>
+                        <tr>
+                            <td></td>
+                            <td><label for="node-id">Id</label></td>
+                            <td><input id="node-id" type="text" value="6"></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><label for="node-label">Label</label></td>
+                            <td><input id="node-label" type="text" value="Node 6"></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Action</td>
+                            <td>
+                                <button id="node-add" onclick="addNode();">Add</button>
+                                <button id="node-update" onclick="updateNode();">Update</button>
+                                <button id="node-remove" onclick="removeNode();">Remove</button>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    <h2>Edge</h2>
+                    <table>
+                        <tr>
+                            <td></td>
+                            <td><label for="edge-id">Id</label></td>
+                            <td><input id="edge-id" type="text" value="5"></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><label for="edge-from">From</label></td>
+                            <td><input id="edge-from" type="text" value="3"></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><label for="edge-to">To</label></td>
+                            <td><input id="edge-to" type="text" value="4"></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Action</td>
+                            <td>
+                                <button id="edge-add" onclick="addEdge();">Add</button>
+                                <button id="edge-update" onclick="updateEdge();">Update</button>
+                                <button id="edge-remove" onclick="removeEdge();">Remove</button>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
 
-    <!-- Creates a container for the graph with a grid wallpaper -->
-    <div id="graphContainer"
-      style="overflow:hidden;
-        position:fixed;
-        left:0;
-        top:0;
-        width:75%;
-        height:100%;
-        background:url( '{% static 'graphview/img/grid.gif' %}' )">
-    </div>
-    <div id="infoContainer"
-      style="overflow:hidden;
-        position:fixed;
-        right:0;
-        top:0;
-        width:25%;
-        height:100%;
-        background:url( '{% static 'graphview/img/infoBG.jpg' %}' )">
+        </table>
+
+        <h1>View</h1>
+        <table class="view">
+            <colgroup>
+                <col width="25%">
+                <col width="25%">
+                <col width="50%">
+            </colgroup>
+            <tr>
+                <td>
+                    <h2>Nodes</h2>
+                    <pre id="nodes"></pre>
+                </td>
+
+                <td>
+                    <h2>Edges</h2>
+                    <pre id="edges"></pre>
+                </td>
+
+                <td>
+                    <h2>Network</h2>
+
+                    <div id="network"></div>
+                </td>
+            </tr>
+        </table>
     </div>
     <!-- Footer -->
-        <footer class="text-center navbar-fixed-bottom">
-            <div class="footer-below">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-12">
-                            Copyright &copy; Foodprints
-                        </div>
+    <footer class="text-center navbar-fixed-bottom">
+        <div class="footer-below">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        Copyright &copy; Foodprints
                     </div>
                 </div>
             </div>
-        </footer>
-
-        <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
-        <div class="scroll-top page-scroll hidden-sm hidden-xs hidden-lg hidden-md">
-            <a class="btn btn-primary" href="#page-top">
-                <i class="fa fa-chevron-up"></i>
-            </a>
         </div>
+    </footer>
 
-        <!-- jQuery -->
-        <script src="{% static "/home/vendor/jquery/jquery.min.js" %}" ></script>
+    <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
+    <div class="scroll-top page-scroll hidden-sm hidden-xs hidden-lg hidden-md">
+        <a class="btn btn-primary" href="#page-top">
+            <i class="fa fa-chevron-up"></i>
+        </a>
+    </div>
 
-        <!-- Bootstrap Core JavaScript -->
-        <script src="{% static "/home/vendor/bootstrap/js/bootstrap.min.js" %}" ></script>
+    <!-- jQuery -->
+    <script src="{% static "/home/vendor/jquery/jquery.min.js" %}" ></script>
 
-        <!-- Plugin JavaScript -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+    <!-- Bootstrap Core JavaScript -->
+    <script src="{% static "/home/vendor/bootstrap/js/bootstrap.min.js" %}" ></script>
 
-        <!-- Theme JavaScript -->
-        <script src="{% static "/home/js/freelancer.min.js" %}"></script>
+    <!-- Plugin JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
 
-    </body>
+    <!-- Theme JavaScript -->
+    <script src="{% static "/home/js/freelancer.min.js" %}"></script>
+
+</body>
 </html>
