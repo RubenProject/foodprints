@@ -1,0 +1,13 @@
+https://docs.djangoproject.com/en/1.10/intro/tutorial01/
+http://127.0.0.1:8000/
+
+
+http://www.w3schools.com/php/php_ajax_database.asp
+
+
+
+bing api: end of life december 15
+https://datamarket.azure.com/dataset/5BA839F1-12CE-4CCE-BF57-A49D98D29A44
+
+duckduckgo API:
+https://duckduckgo.com/api

@@ -5,6 +5,7 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone
 import xml.etree.cElementTree as ET
 import random
+import json
 
 def get_data(request):
     limit = 5
@@ -38,7 +39,17 @@ def get_data(request):
     cwidth = "60"
     cheight = "40"
 
-    return HttpResponse("testText")
+    data = {}
+    data['nodes'] = [{"id" : "0", "label": recipe.recipe_name}]
+    data['edges'] = []
+
+    for idx, suggestion in enumerate(suggestions):
+        data['nodes'].append({"id" : str(idx + 1), "label": suggestion.recipe_name})
+        data['edges'].append({"id" : str(idx), "from": "0", "to": str(idx + 1)})
+
+    print data
+
+    return HttpResponse(json.dumps(data))
 
 def add_recipe(request):
     error_text = ""
