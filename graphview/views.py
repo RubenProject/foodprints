@@ -6,6 +6,18 @@ from django.utils import timezone
 import xml.etree.cElementTree as ET
 import random
 import json
+import urllib
+import urllib2
+
+def get_image(recipeName):
+    request = urllib.urlencode(dict(q=recipeName, format='json', t='Foodprints'))
+    response = urllib2.urlopen('https://api.duckduckgo.com?' + request)
+    d = json.load(response)
+    if (d['Image'] == ''):
+        return '/static/graphview/img/broken.png'
+    else: 
+        return d['Image']
+
 
 def get_data(request):
     limit = 5
@@ -40,11 +52,11 @@ def get_data(request):
     cheight = "40"
 
     data = {}
-    data['nodes'] = [{"id" : "0", "label": recipe.recipe_name}]
+    data['nodes'] = [{"id" : "0", "label": recipe.recipe_name, "image": get_image(recipe.recipe_name)}]
     data['edges'] = []
 
     for idx, suggestion in enumerate(suggestions):
-        data['nodes'].append({"id" : str(idx + 1), "label": suggestion.recipe_name})
+        data['nodes'].append({"id" : str(idx + 1), "label": suggestion.recipe_name, "image": get_image(suggestion.recipe_name)})
         data['edges'].append({"id" : str(idx), "from": "0", "to": str(idx + 1)})
 
     print data

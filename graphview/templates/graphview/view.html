@@ -40,7 +40,7 @@
     <script type="text/javascript" src="{% static "graphview/lib/vis-4.17.0/dist/vis.js" %}"></script>
 
     <script type="text/javascript">
-        var nodes, edges, network, focusedNode;
+        var nodes, edges, network, focusedNode, imgURL;
 
         // convenience method to stringify a JSON object
         function toJSON(obj) {
@@ -50,6 +50,7 @@
         function updateGraph(graphArray){
             //create an array with nodes
             nodes = new vis.DataSet();
+            //graphArray.nodes = addImages(graphArray.nodes);
             nodes.add(graphArray.nodes);
 
             // create an array with edges
@@ -64,8 +65,6 @@
             };
             var options = {
                 nodes: {
-                    image: '{% static 'graphview/img/doesnotexist.png' %}',
-                    brokenImage: '{% static 'graphview/img/broken.png' %}',
                     shape: 'circularImage',
                     borderWidth:4,
                     size: 50,
@@ -85,7 +84,7 @@
                 },
                 edges: {
                     color: 'green',
-                    length: 200,
+                    length: 250,
                     width: 5
                 }
             };
