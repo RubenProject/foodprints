@@ -27,8 +27,21 @@ def get_image(recipeName):
     else:
         return '/static/graphview/img/broken.png'
 
+def get_info(request):
+    recipe = get_object_or_404(Recipe, recipe_name=request.META['HTTP_RECIPE'])
+    info = {}
+    info['image'] = get_image(recipe.recipe_name)
+    info['recipe'] = recipe.recipe_name
+    info['color'] = recipe.color
+    info['country_of_origin'] = recipe.country_of_origin
+    info['ingredients'] = []
+    ingredient_obj_list = recipe.ingredients.all()
+    for ingredient in ingredient_obj_list:
+        info['ingredients'].append(ingredient.ingredient_name)
+    print info
+    return HttpResponse(json.dumps(info))
 
-def get_data(request):
+def get_recipes(request):
     limit = 5
     if ('requestID' in request.session):
         request.session['requestID'] += 1
@@ -55,7 +68,6 @@ def get_data(request):
         suggestions = qs.order_by('?')
     elif count < limit:
         suggestions = suggestions | qs.exclude(id__in=suggestions.values_list('id', flat=True)).order_by('?')[:limit-count]
-    print suggestions
 
     cwidth = "60"
     cheight = "40"
@@ -67,8 +79,6 @@ def get_data(request):
     for idx, suggestion in enumerate(suggestions):
         data['nodes'].append({"id" : str(idx + 1), "label": suggestion.recipe_name, "image": get_image(suggestion.recipe_name)})
         data['edges'].append({"id" : str(idx), "from": "0", "to": str(idx + 1)})
-
-    print data
 
     return HttpResponse(json.dumps(data))
 

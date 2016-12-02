@@ -47,6 +47,21 @@
             return JSON.stringify(obj, null, 4);
         }
 
+        function updateInfo(info){
+            var container = document.getElementById('infoContainer');
+            var infoText = "<h2>" + info.recipe +"</h2><br/>";
+            infoText = infoText.concat("<img src=\x22" + info.image + "\x22/>");
+            infoText = infoText.concat("<p>" +
+                           "Color: " + info.color + "<br/>" + 
+                           "Country of origin: " + info.country_of_origin + "<br/>");
+            infoText = infoText.concat("<ol style=\x22list-style-type:disc\x22>");
+            for (i = 0; i < info.ingredients.length; i++){
+                infoText = infoText.concat("<li>" + info.ingredients[i] + "</li>");
+            }
+            infoText = infoText.concat("</ol>");
+            container.innerHTML = infoText;
+        }
+
         function updateGraph(graphArray){
             //create an array with nodes
             nodes = new vis.DataSet();
@@ -107,17 +122,30 @@
                 focusedNode = "{{ focusedNode }}";
             }
             var xmlhttp = new XMLHttpRequest();
-            var url = "{% url 'graphview:get_data' %}";
+            var url = "{% url 'graphview:get_recipes' %}";
 
             xmlhttp.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
-                    var myArr = JSON.parse(this.responseText);
-                    updateGraph(myArr);
+                    var myObj = JSON.parse(this.responseText);
+                    updateGraph(myObj);
                 }
             };
             xmlhttp.open("GET", url, true);
             xmlhttp.setRequestHeader("recipe", focusedNode);
             xmlhttp.send();
+
+            var xmlhttp2 = new XMLHttpRequest();
+            url = "{% url 'graphview:get_info' %}";
+
+            xmlhttp2.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    var myObj = JSON.parse(this.responseText);
+                    updateInfo(myObj);
+                }
+            };
+            xmlhttp2.open("GET", url, true);
+            xmlhttp2.setRequestHeader("recipe", focusedNode);
+            xmlhttp2.send();
         }
 
     </script>
@@ -137,12 +165,12 @@
             </div>
         </div>
     </nav>
-    <div style="padding-top: 65px">
+    <div style="margin-top: 100px;
+                margin-bottom: 67px">
         <div id="graphContainer"
           style="overflow:hidden;
             position:fixed;
             left:0;
-            top:0;
             width:75%;
             height:100%;
             background:url( '{% static 'graphview/img/grid.gif' %}' )">
@@ -151,10 +179,13 @@
           style="overflow:hidden;
             position:fixed;
             right:0;
-            top:0;
             width:25%;
             height:100%;
-            border-style: outset" >
+            border-style: outset;
+            padding-top: 5px;
+            padding-bottom: 10px;
+            padding-left: 15px;
+            padding-right: 10px" >
         </div>
     </div>
     <!-- Footer -->
