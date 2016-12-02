@@ -1,4 +1,5 @@
 <html>
+    
     <head>
         {% load static %}
         <meta charset="utf-8">
@@ -43,14 +44,36 @@
                         <hr class="star-primary">
                     </div>
                 </div>
-                <div class="row">
                     <form action="{% url 'graphview:answer' question_num %}" method="post">
-                        {% csrf_token %}
-                        {% for option in option_list %}
-                            <input type="radio" name="answer" id="answer{{ forloop.counter }}" value="{{ option }}" />
-                            <label for="option{{ forloop.counter }}">{{ option }}</label><br />
+                        <div class="row">
+                            {% csrf_token %}
+                            {% for option in option_list %}
+                            <div class="col-lg-3"style="background-color: lightgray;
+                                                        margin: 5px;
+                                                        padding: 5px">
+                                {% if question_num == "1" %}
+                                <label for="option{{ forloop.counter }}" 
+                                       style="background-color: {{ option.1 }};
+                                            height: 250px;
+                                            width: 100%"> 
+                                </label>
+                                {% else %}
+                                <img src="{{ option.1 }}" class="img-responsive"/>
+                                {% endif %}
+                                <center>
+                                    <p>{{ option.0 }}</p>
+                                </center>
+                                <center>
+                                    <input type="radio" name="answer" id="answer{{ forloop.counter }}" value="{{ option.0 }}" />
+                                </center>
+                            </div>
                         {% endfor %}
-                        <input type="submit" value="answer" />
+                        </div>
+                        <div class="row">
+                            <center>
+                                <input type="submit" value="answer" />
+                            </center>
+                        </div>
                     </form>
                 </div>
             </div>

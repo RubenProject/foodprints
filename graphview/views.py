@@ -3,20 +3,29 @@ from django.http import HttpResponse, HttpResponseRedirect
 from graphview.models import Recipe, Ingredient
 from django.core.urlresolvers import reverse
 from django.utils import timezone
-import xml.etree.cElementTree as ET
 import random
 import json
 import urllib
 import urllib2
+import itertools
 
 def get_image(recipeName):
-    request = urllib.urlencode(dict(q=recipeName, format='json', t='Foodprints'))
-    response = urllib2.urlopen('https://api.duckduckgo.com?' + request)
+    fields = ['', 'picture of ', 'plate of ', 'people eating ']
+    for field in fields:
+        query = urllib.urlencode(dict(q=field + recipeName, format='json', t='Foodprints'))
+        response = urllib2.urlopen('https://api.duckduckgo.com?' + query)
+        d = json.load(response)
+        if (d['Image'] != ''):
+            return d['Image']
+    
+    country = Recipe.objects.get(recipe_name=recipeName).country_of_origin
+    query = urllib.urlencode(dict(q='flag of ' + country, format='json', t='Foodprints'))
+    response = urllib2.urlopen('https://api.duckduckgo.com?' + query)
     d = json.load(response)
-    if (d['Image'] == ''):
-        return '/static/graphview/img/broken.png'
-    else: 
+    if (d['Image'] != ''):
         return d['Image']
+    else:
+        return '/static/graphview/img/broken.png'
 
 
 def get_data(request):
@@ -101,47 +110,103 @@ def view(request, recipe):
         })
     
 def question(request, question_num):
+    #TODO: if number of choices is down to 1, pick randomly
     if int(question_num) == 1:
         color_list = get_list_or_404(Recipe.objects.order_by('color').values_list('color').distinct())
         color_str_list = []
         for color in color_list:
             color_str_list.append(''.join(color[0]).encode("ascii"))
+        url_list = []
+        for color in color_str_list:
+            query = urllib.urlencode(dict(q='color ' + color, format='json', t='Foodprints'))
+            response = urllib2.urlopen('https://api.duckduckgo.com?' + query)
+            d = json.load(response)
+            url_list.append(d['Answer'][5:12])
+        option_list = zip(color_str_list, url_list)
         return render(request, 'graphview/question.html', {
             'question': "What color is your food?",
             'question_num': question_num,
-            'option_list': color_str_list,
+            'option_list': option_list,
             })
-    if int(question_num) == 2:
+    elif int(question_num) == 2:
         recipe_list = Recipe.objects.filter(color=request.session['color'])
         country_list = get_list_or_404(recipe_list.order_by('country_of_origin').values_list('country_of_origin').distinct())
         country_str_list = []
         for country in country_list:
             country_str_list.append(''.join(country[0]).encode("ascii"))
+        url_list = []
+        fields = ['', 'flag of ', 'people of ', 'culture of ']
+        for country in country_str_list:
+            for field in fields:
+                query = urllib.urlencode(dict(q=field + country, format='json', t='Foodprints'))
+                response = urllib2.urlopen('https://api.duckduckgo.com?' + query)
+                d = json.load(response)
+                if d['Image'] != '':
+                    url_list.append(d['Image'])
+                    break
+            if d['Image'] == '':
+                url_list.append('could not find picture')
+        option_list = zip(country_str_list, url_list)
+        print option_list
         return render(request, 'graphview/question.html', {
             'question': "What country is your food from?",
             'question_num': question_num,
-            'option_list': country_str_list,
+            'option_list': option_list,
             })
-    if int(question_num) == 3:
+    elif int(question_num) == 3:
         recipe_list = Recipe.objects.filter(color=request.session['color'])
         recipe_list = recipe_list.filter(country_of_origin=request.session['country_of_origin'])
         ingredient_list = get_list_or_404(Ingredient.objects.filter(recipe=recipe_list).distinct())
+        ingredient_str_list = []
+        for ingredient in ingredient_list:
+            ingredient_str_list.append(''.join(ingredient.ingredient_name).encode("ascii"))
+        url_list = []
+        fields = ['', 'picture of ', 'people eating ', 'a pinch of ', 'a cup of ']
+        for idx in ingredient_str_list:
+            for field in fields:
+                query = urllib.urlencode(dict(q=field + idx, format='json', t='Foodprints'))
+                response = urllib2.urlopen('https://api.duckduckgo.com?' + query)
+                d = json.load(response)
+                if d['Image'] != '':
+                    url_list.append(d['Image'])
+                    break
+            if d['Image'] == '':
+                url_list.append('could not find picture')
+                #TODO needs a backup plan really...
+        option_list = zip(ingredient_str_list, url_list)
         return render(request, 'graphview/question.html', {
             'question': "Which of these ingredients is in your food?",
             'question_num': question_num,
-            'option_list': ingredient_list,
+            'option_list': option_list,
             })
-    if int(question_num) == 4:
+    elif int(question_num) == 4:
         recipe_list = Recipe.objects.filter(color=request.session['color'])
         recipe_list = recipe_list.filter(country_of_origin=request.session['country_of_origin'])
         recipe_list = recipe_list.filter(ingredients=Ingredient.objects.filter(ingredient_name=request.session['ingredient1']))
         ingredient_list = get_list_or_404(Ingredient.objects.filter(recipe=recipe_list).distinct())
+        ingredient_str_list = []
+        for ingredient in ingredient_list:
+            ingredient_str_list.append(''.join(ingredient.ingredient_name).encode("ascii"))
+        url_list = []
+        fields = ['', 'picture of ', 'people eating ', 'a pinch of ', 'a cup of ']
+        for idx in ingredient_str_list:
+            for field in fields:
+                query = urllib.urlencode(dict(q=field + idx, format='json', t='Foodprints'))
+                response = urllib2.urlopen('https://api.duckduckgo.com?' + query)
+                d = json.load(response)
+                if d['Image'] != '':
+                    url_list.append(d['Image'])
+                    break
+            if d['Image'] == '':
+                url_list.append('could not find picture')
+                #TODO needs a backup plan really...
+        option_list = zip(ingredient_str_list, url_list)
         return render(request, 'graphview/question.html', {
             'question': "Which of these ingredients is in your food?",
             'question_num': question_num,
-            'option_list': ingredient_list,
+            'option_list': option_list,
             })
-    if int(question_num) == 5:
+    elif int(question_num) == 5:
         recipe_list = Recipe.objects.filter(color=request.session['color'])
         recipe_list = recipe_list.filter(country_of_origin=request.session['country_of_origin'])
         recipe_list = recipe_list.filter(ingredients=Ingredient.objects.filter(ingredient_name=request.session['ingredient1']))
@@ -155,10 +220,10 @@ def answer(request, question_num):
     else:
         if int(question_num) == 1:
             request.session['color'] = request.POST.get('answer', False)
-        if int(question_num) == 2: 
+        elif int(question_num) == 2: 
             request.session['country_of_origin'] = request.POST.get('answer', False)
-        if int(question_num) == 3:
+        elif int(question_num) == 3:
             request.session['ingredient1'] = request.POST.get('answer', False)
-        if int(question_num) == 4:
+        elif int(question_num) == 4:
             request.session['ingredient2'] = request.POST.get('answer', False)
         return HttpResponseRedirect(reverse('graphview:question', args=(int(question_num)+1,)))
