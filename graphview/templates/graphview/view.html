@@ -41,16 +41,33 @@
 
     <script type="text/javascript">
         var nodes, edges, network, focusedNode, imgURL;
+        var containerHeight, containerWidth;
 
         // convenience method to stringify a JSON object
         function toJSON(obj) {
             return JSON.stringify(obj, null, 4);
         }
+        function addPositions(nodeArray){
+            var cx = containerWidth / 2 - 100;
+            var cy = containerHeight / 2 ;
+            var r = Math.min(containerWidth / 4, containerHeight / 4);
+            var cellCount = nodeArray.length;
+            var phi = Math.PI / cellCount;
+            nodeArray[0].x = cx;
+            nodeArray[0].y = cy;
+            nodeArray[0].fixed = true;
+            for (i = 1; i < cellCount; i++){
+                nodeArray[i].x = cx + r * Math.sin((i+1) * phi);
+                nodeArray[i].y = cy + r * Math.cos((i+1) * phi);
+                nodeArray[i].fixed = true;
+            }
+            return nodeArray;
+        }
 
         function updateInfo(info){
             var container = document.getElementById('infoContainer');
             var infoText = "<h2>" + info.recipe +"</h2><br/>";
-            infoText = infoText.concat("<img src=\x22" + info.image + "\x22/>");
+            infoText = infoText.concat("<img src=\x22" + info.image + "\x22 class=\x22img-responsive\x22/>");
             infoText = infoText.concat("<p>" +
                            "Color: " + info.color + "<br/>" + 
                            "Country of origin: " + info.country_of_origin + "<br/>");
@@ -65,7 +82,7 @@
         function updateGraph(graphArray){
             //create an array with nodes
             nodes = new vis.DataSet();
-            //graphArray.nodes = addImages(graphArray.nodes);
+            graphArray.nodes = addPositions(graphArray.nodes);
             nodes.add(graphArray.nodes);
 
             // create an array with edges
@@ -78,14 +95,19 @@
                 nodes: nodes,
                 edges: edges
             };
+            //seems to cause some sort of slowdown?
+            scale = Math.min(containerHeight, containerWidth) / 15;
             var options = {
                 nodes: {
                     shape: 'circularImage',
                     borderWidth:4,
-                    size: 50,
+                    size: scale,
                     color: {
                         border: 'green',
-                        background: 'lightgreen'
+                        background: 'lightgreen',
+                        highlight: {
+                            border: 'darkgreen'
+                        }
                     },
                     font: {
                         color: 'black',
@@ -101,9 +123,14 @@
                     color: 'green',
                     length: 250,
                     width: 5
+                },
+                interaction: {
+                    dragView: false,
+                    zoomView: false
                 }
             };
             network = new vis.Network(container, data, options);
+            network.selectNodes([0]);
             network.on( 'click', function(properties) {
                 var ids = properties.nodes;
                 var clickedNodes = nodes.get(ids);
@@ -115,7 +142,8 @@
         }
 
         function draw(recipe) {
-            // create an array with nodes
+            containerHeight = document.getElementById('graphContainer').clientHeight;  
+            containerWidth = document.getElementById('graphContainer').clientWidth;  
             if (recipe){
                 focusedNode = recipe;
             } else {

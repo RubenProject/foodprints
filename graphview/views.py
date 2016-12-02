@@ -38,7 +38,6 @@ def get_info(request):
     ingredient_obj_list = recipe.ingredients.all()
     for ingredient in ingredient_obj_list:
         info['ingredients'].append(ingredient.ingredient_name)
-    print info
     return HttpResponse(json.dumps(info))
 
 def get_recipes(request):
@@ -157,7 +156,6 @@ def question(request, question_num):
             if d['Image'] == '':
                 url_list.append('could not find picture')
         option_list = zip(country_str_list, url_list)
-        print option_list
         return render(request, 'graphview/question.html', {
             'question': "What country is your food from?",
             'question_num': question_num,
