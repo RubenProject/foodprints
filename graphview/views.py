@@ -4,6 +4,7 @@ from graphview.models import Recipe, Ingredient
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 import random
+from random import randint, shuffle
 import json
 import urllib
 import urllib2
@@ -42,44 +43,41 @@ def get_info(request):
 
 def get_recipes(request):
     limit = 5
-    if ('requestID' in request.session):
-        request.session['requestID'] += 1
-    else:
-        request.session['requestID'] = 1
-    reqID = request.session['requestID']
-    reqID = str(reqID) + '-'
+    target_recipe = get_object_or_404(Recipe, recipe_name=request.META['HTTP_RECIPE'])
+    recipe_list = Recipe.objects.all().exclude(id=target_recipe.id)
 
-    fields = ['color', 'country_of_origin']
-    recipe = get_object_or_404(Recipe, recipe_name=request.META['HTTP_RECIPE'])
-    suggestions = Recipe.objects.none()
-    qs = Recipe.objects.exclude(id=recipe.id) 
+    fields = get_list_or_404(target_recipe.ingredients.all())
+    suggestion_list = []
+    spare_list = []
+    shuffle(fields)
+    refinement = 0
+    for idx, field in enumerate(fields):
+        temp_list = recipe_list.filter(ingredients=field)
+        if temp_list.count() <= limit and temp_list.count() >= limit / 2 and refinement > 1:
+            suggestion_list = get_list_or_404(temp_list)
+            break
+        elif temp_list.count() <= limit / 2:
+            if temp_list.count() > 0:
+                spare_list.append(get_list_or_404(temp_list))
+            elif len(spare_list) >= limit and idx > 3:
+                suggestion_list = spare_list
+                break
+            continue
+        print field
+        recipe_list = temp_list
+        refinement += 1
 
-    for field in fields:
-        val = getattr(recipe, field)
-        if val:
-            d = {field: val}
-            qs_ = qs.filter(**d)
-            if qs_:
-                suggestions = qs_
-
-    count = suggestions.count()
-    if count == 0:
-        suggestions = qs.order_by('?')
-    elif count < limit:
-        suggestions = suggestions | qs.exclude(id__in=suggestions.values_list('id', flat=True)).order_by('?')[:limit-count]
-
-    cwidth = "60"
-    cheight = "40"
+    print suggestion_list
 
     data = {}
-    data['nodes'] = [{"id" : "0", "label": recipe.recipe_name, "image": get_image(recipe.recipe_name)}]
+    data['nodes'] = [{"id" : "0", "label": target_recipe.recipe_name, "image": get_image(target_recipe.recipe_name)}]
     data['edges'] = []
 
-    for idx, suggestion in enumerate(suggestions):
+    for idx, suggestion in enumerate(suggestion_list):
         data['nodes'].append({"id" : str(idx + 1), "label": suggestion.recipe_name, "image": get_image(suggestion.recipe_name)})
         data['edges'].append({"id" : str(idx), "from": "0", "to": str(idx + 1)})
 
-    return HttpResponse(json.dumps(data))
+    return HttpResponse(json.dumps(data))  
 
 def add_recipe(request):
     error_text = ""
