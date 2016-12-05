@@ -12,17 +12,19 @@ class Ingredient(models.Model):
         ('PO', 'Pork'),
         ('FI', 'Fish'),
         ('MO', 'Meat_other'),
-        ('SA', 'Sauce'),
+        ('HE', 'Herb'),
         ('SP', 'Spice'),
         ('DI', 'Diary'),
+        ('OI', 'Oil'),
+        ('AL', 'Alcohol'),
         ('NU', 'Nuts'),
+        ('FR', 'Fruit'),
     )
     ingredient_name = models.CharField(max_length = 200)
     ingredient_type = models.CharField(
         max_length = 2,
         choices = INGREDIENT_TYPE_CHOICES,
     )
-    healthyness = models.IntegerField()
     
     def __str__(self):
         return self.ingredient_name
@@ -38,6 +40,8 @@ class Recipe(models.Model):
         ('BLACK', 'Black'),
         ('WHITE', 'White'),
         ('GREEN', 'Green'),
+        ('Pink', 'Pink'),
+        ('Orange', 'Orange'),
         ('OTHER', 'Other'),
     )
     recipe_name = models.CharField(max_length = 200)
