@@ -46,36 +46,44 @@
                     </div>
                 </div>
                     <form action="{% url 'graphview:answer' question_num %}" method="post">
-                        <div class="row">
+                        <div class="row text-align-center">
                             {% csrf_token %}
                             {% for option in option_list %}
-                            <div class="col-lg-3"style="background-color: white;
-                                                        margin: 5px;
+                            <div class="col-lg-3">
+                                 <div onclick="selectCard('answer{{ forloop.counter }}')"
+                                                    style="background-color: white;
+                                                        margin: 10px 0px 15px;
                                                         padding: 5px;
                                                         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)">
-                                {% if question_num == "1" %}
-                                <label for="option{{ forloop.counter }}" 
-                                       style="background-color: {{ option.1 }};
-                                            height: 250px;
-                                            width: 100%"> 
-                                </label>
-                                {% else %}
-                                <img src="{{ option.1 }}" class="img-responsive" style="height: 250px"/>
-                                {% endif %}
-                                <center>
-                                    <p>{{ option.0 }}</p>
-                                </center>
-                                <center>
-                                    <input type="radio" name="answer" id="answer{{ forloop.counter }}" value="{{ option.0 }}" />
-                                </center>
+                                    {% if question_num == "1" %}
+                                    <label for="option{{ forloop.counter }}" 
+                                           style="background-color: {{ option.1 }};
+                                                height: 250px;
+                                                width: 100%"> 
+                                    </label>
+                                    {% else %}
+                                    <img src="{{ option.1 }}" class="img-responsive" style="height: 250px"/>
+                                    {% endif %}
+                                    <center>
+                                        <p>{{ option.0 }}</p>
+                                    </center>
+                                    <center>
+                                        <input type="radio" name="answer" id="answer{{ forloop.counter }}" value="{{ option.0 }}" />
+                                    </center>
+                                </div>
                             </div>
-                        {% endfor %}
+                            {% endfor %}
                         </div>
                         <div class="row">
                             <center>
                                 <br/>
                                 <input type="submit" value="answer" />
                             </center>
+                            <script>
+                                function selectCard(option){
+                                    document.getElementById(option).checked = true;
+                                }
+                            </script>
                         </div>
                     </form>
                 </div>

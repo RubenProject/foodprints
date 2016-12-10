@@ -91,10 +91,6 @@ def add_recipe_to_database(request):
     country_of_origin = request.POST['country_of_origin']
     ingredient1 = request.POST['ingredient1']
     new_recipe = Recipe(recipe_name=recipe_name, color=color, country_of_origin=country_of_origin)
-    #new_recipe.save()
-    #if ingredient already exists add to recipe
-    #else add ingredient in database
-    #possible needs some extra user input :/
     return HttpResponseRedirect(reverse(request, 'graphview:add_recipe'))
 
 def all_recipes(request):
@@ -118,6 +114,7 @@ def view(request, recipe):
     
 def question(request, question_num):
     #TODO: if number of choices is down to 1, pick randomly
+    PIC_DIR = "/static/graphview/img/ingredient_type/"
     if int(question_num) == 1:
         color_list = get_list_or_404(Recipe.objects.order_by('color').values_list('color').distinct())
         color_str_list = []
@@ -167,7 +164,7 @@ def question(request, question_num):
         for ingredient in ingredient_list:
             ingredient_str_list.append(''.join(ingredient.ingredient_name).encode("ascii"))
         url_list = []
-        fields = ['', 'picture of ', 'people eating ', 'a pinch of ', 'a cup of ']
+        fields = ['', 'picture of '] 
         for idx in ingredient_str_list:
             for field in fields:
                 query = urllib.urlencode(dict(q=field + idx, format='json', t='Foodprints'))
@@ -177,8 +174,8 @@ def question(request, question_num):
                     url_list.append(d['Image'])
                     break
             if d['Image'] == '':
-                url_list.append('could not find picture')
-                #TODO needs a backup plan really...
+                ingredient_type = Ingredient.objects.get(ingredient_name=idx).ingredient_type
+                url_list.append(PIC_DIR + ingredient_type + ".png")
         option_list = zip(ingredient_str_list, url_list)
         return render(request, 'graphview/question.html', {
             'question': "Which of these ingredients is in your food?",
@@ -194,7 +191,7 @@ def question(request, question_num):
         for ingredient in ingredient_list:
             ingredient_str_list.append(''.join(ingredient.ingredient_name).encode("ascii"))
         url_list = []
-        fields = ['', 'picture of ', 'people eating ', 'a pinch of ', 'a cup of ']
+        fields = ['', 'picture of ', 'people eating ']
         for idx in ingredient_str_list:
             for field in fields:
                 query = urllib.urlencode(dict(q=field + idx, format='json', t='Foodprints'))
@@ -204,8 +201,8 @@ def question(request, question_num):
                     url_list.append(d['Image'])
                     break
             if d['Image'] == '':
-                url_list.append('could not find picture')
-                #TODO needs a backup plan really...
+                ingredient_type = Ingredient.objects.get(ingredient_name=idx).ingredient_type
+                url_list.append(PIC_DIR + ingredient_type + ".png")
         option_list = zip(ingredient_str_list, url_list)
         return render(request, 'graphview/question.html', {
             'question': "Which of these ingredients is in your food?",

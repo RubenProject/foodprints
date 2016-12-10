@@ -50,15 +50,15 @@
         function addPositions(nodeArray){
             var cx = containerWidth / 2 - 100;
             var cy = containerHeight / 2 ;
-            var r = Math.min(containerWidth / 4, containerHeight / 4);
+            var r = Math.min(containerWidth / 3, containerHeight / 3);
             var cellCount = nodeArray.length;
             var phi = Math.PI / cellCount;
             nodeArray[0].x = cx;
             nodeArray[0].y = cy;
             nodeArray[0].fixed = true;
             for (i = 1; i < cellCount; i++){
-                nodeArray[i].x = cx + r * Math.sin(i * phi + Math.PI / 2);
-                nodeArray[i].y = cy + r * Math.cos(i * phi + Math.PI / 2);
+                nodeArray[i].x = cx + r * Math.sin(i * phi - Math.PI / 2);
+                nodeArray[i].y = cy + r * Math.cos(i * phi - Math.PI / 2);
                 nodeArray[i].fixed = true;
             }
             return nodeArray;
@@ -69,7 +69,6 @@
             var infoText = "<h2>" + info.recipe +"</h2><br/>";
             infoText = infoText.concat("<img src=\x22" + info.image + "\x22 class=\x22img-responsive\x22/>");
             infoText = infoText.concat("<p>" +
-                           "Color: " + info.color + "<br/>" + 
                            "Country of origin: " + info.country_of_origin + "<br/>");
             infoText = infoText.concat("<ol style=\x22list-style-type:disc\x22>");
             for (i = 0; i < info.ingredients.length; i++){
@@ -82,7 +81,10 @@
         function updateGraph(graphArray){
             //create an array with nodes
             nodes = new vis.DataSet();
+            //seems to cause some sort of slowdown?
+            scale = Math.min(containerHeight, containerWidth) / 15;
             graphArray.nodes = addPositions(graphArray.nodes);
+            graphArray.nodes[0].size = scale * 1.5;
             nodes.add(graphArray.nodes);
 
             // create an array with edges
@@ -95,8 +97,6 @@
                 nodes: nodes,
                 edges: edges
             };
-            //seems to cause some sort of slowdown?
-            scale = Math.min(containerHeight, containerWidth) / 15;
             var options = {
                 nodes: {
                     shape: 'circularImage',
@@ -121,8 +121,8 @@
                 },
                 edges: {
                     color: 'green',
-                    length: 250,
-                    width: 5
+                    width: 5,
+                    arrows: 'to'
                 },
                 interaction: {
                     dragView: false,
