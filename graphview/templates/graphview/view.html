@@ -11,10 +11,10 @@
     <title>Foodprints - An interactive foodnetwork!</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="{% static "home/vendor/bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+    <link href="{% static "graphview/vendor/bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- Theme CSS -->
-    <link href="{% static "home/css/index.css" %}" rel="stylesheet">
+    <link href="{% static "graphview/css/index.css" %}" rel="stylesheet">
 
     <!-- Custom Fonts -->
     <link href="{% static "home/vendor/font-awesome/css/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
@@ -66,16 +66,15 @@
 
         function updateInfo(info){
             var container = document.getElementById('infoContainer');
-            var infoText = "<h2>" + info.recipe +"</h2><br/>";
-            infoText = infoText.concat("<img src=\x22" + info.image + "\x22 class=\x22img-responsive\x22/>");
-            infoText = infoText.concat("<p>" +
-                           "Country of origin: " + info.country_of_origin + "<br/>");
-            infoText = infoText.concat("<ol style=\x22list-style-type:disc\x22>");
+            document.getElementById('foodTitle').innerHTML = info.recipe;
+            document.getElementById('foodImg').innerHTML = "<img src=\x22" + info.image + "\x22/ style=\x22width=100%; border-radius: 5px; border: 2px solid gray\x22>";
+            document.getElementById('foodCountry').innerHTML = "<p> Country of origin: " + info.country_of_origin;
+            var infoText = "<ol style=\x22list-style-type:disc\x22>";
             for (i = 0; i < info.ingredients.length; i++){
                 infoText = infoText.concat("<li>" + info.ingredients[i] + "</li>");
             }
             infoText = infoText.concat("</ol>");
-            container.innerHTML = infoText;
+            document.getElementById('foodIngrList').innerHTML = infoText;
         }
 
         function updateGraph(graphArray){
@@ -212,8 +211,17 @@
             border-style: outset;
             padding-top: 5px;
             padding-bottom: 10px;
-            padding-left: 15px;
-            padding-right: 10px" >
+            padding-left: 25px;
+            padding-right: 10px;
+            background:url( '{% static 'graphview/img/notebookpaper.png' %}' )" >
+                <h2 id="foodTitle" class="text-center row">
+                </h2>
+                <div id="foodImg" class="row text-center" style="width: 100%">
+                </div>
+                <div id="foodCountry" class="row mt-3"> 
+                </div>
+                <div id="foodIngrList" class="row mt-3">
+                </div>
         </div>
     </div>
     <!-- Footer -->
