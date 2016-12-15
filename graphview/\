@@ -222,8 +222,6 @@
                 </div>
                 <div id="foodIngrList" class="row mt-10" style="padding-left: 75px; font-size: 20px; font-family:verdana">
                 </div>
-                <div style="height: 50px">
-                </div>
         </div>
     </div>
     <!-- Footer -->
