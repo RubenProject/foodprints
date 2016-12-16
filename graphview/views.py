@@ -10,6 +10,13 @@ import urllib
 import urllib2
 import itertools
 
+def get_link(recipeName):
+    query = urllib.urlencode(dict(q='recipe ' + recipeName, format='json', t='Foodprints'))
+    response = urllib2.urlopen('https://api.duckduckgo.com?' + query)
+    d = json.load(response)
+#would be awesome if this works but it wont...
+    return 'http://www.bbcgoodfood.com'
+
 def get_image(recipeName):
     fields = ['', 'picture of ', 'plate of ', 'people eating ']
     for field in fields:
@@ -35,6 +42,7 @@ def get_info(request):
     info['recipe'] = recipe.recipe_name
     info['color'] = recipe.color
     info['country_of_origin'] = recipe.country_of_origin
+    info['link'] = get_link(recipe.recipe_name)
     info['ingredients'] = []
     ingredient_obj_list = recipe.ingredients.all()
     for ingredient in ingredient_obj_list:

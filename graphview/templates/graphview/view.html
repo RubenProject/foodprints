@@ -14,7 +14,7 @@
     <link href="{% static "graphview/vendor/bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
 
     <!-- Theme CSS -->
-    <link href="{% static "graphview/css/index.css" %}" rel="stylesheet">
+    <link href="{% static "home/css/index.css" %}" rel="stylesheet">
 
     <!-- Custom Fonts -->
     <link href="{% static "home/vendor/font-awesome/css/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
@@ -69,6 +69,7 @@
             document.getElementById('foodTitle').innerHTML = info.recipe;
             document.getElementById('foodImg').innerHTML = "<img src=\x22" + info.image + "\x22/ style=\x22width=100%; border-radius: 5px; border: 2px solid gray\x22>";
             document.getElementById('foodCountry').innerHTML = "<p style=\x22font-size: 30px;font-family:verdana\x22> Country of origin: " + info.country_of_origin;
+            document.getElementById('foodLink').innerHTML = "<a href=\x22" + info.link + "\x22 style=\x22font-size: 20px;font-family:verdana\x22> Take me to the recipe!";
             var infoText = "<ol style=\x22list-style-type:disc\x22>";
             for (i = 0; i < info.ingredients.length; i++){
                 infoText = infoText.concat("<li>" + info.ingredients[i] + "</li>");
@@ -220,7 +221,9 @@
                 </div>
                 <div id="foodCountry" class="row" style="padding-left: 75px; margin-top: 10px"> 
                 </div>
-                <div id="foodIngrList" class="row mt-10" style="padding-left: 75px; font-size: 20px; font-family:verdana">
+                <div id="foodLink" class="row" style="padding-left: 75px; margin-top: 10px"> 
+                </div>
+                <div id="foodIngrList" class="row" style="padding-left: 75px; padding-top: 20px; font-size: 20px; font-family:verdana">
                 </div>
                 <div style="height: 50px">
                 </div>
