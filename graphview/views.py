@@ -10,15 +10,8 @@ import urllib
 import urllib2
 import itertools
 
-def get_link(recipeName):
-    query = urllib.urlencode(dict(q='recipe ' + recipeName, format='json', t='Foodprints'))
-    response = urllib2.urlopen('https://api.duckduckgo.com?' + query)
-    d = json.load(response)
-#would be awesome if this works but it wont...
-    return 'http://www.bbcgoodfood.com'
-
 def get_image(recipeName):
-    fields = ['', 'picture of ', 'plate of ', 'people eating ']
+    fields = ['', 'picture of ']
     for field in fields:
         query = urllib.urlencode(dict(q=field + recipeName, format='json', t='Foodprints'))
         response = urllib2.urlopen('https://api.duckduckgo.com?' + query)
@@ -42,7 +35,7 @@ def get_info(request):
     info['recipe'] = recipe.recipe_name
     info['color'] = recipe.color
     info['country_of_origin'] = recipe.country_of_origin
-    info['link'] = get_link(recipe.recipe_name)
+    info['link'] = 'http://www.bbcgoodfood.com'
     info['ingredients'] = []
     ingredient_obj_list = recipe.ingredients.all()
     for ingredient in ingredient_obj_list:
@@ -147,17 +140,14 @@ def question(request, question_num):
         for country in country_list:
             country_str_list.append(''.join(country[0]).encode("ascii"))
         url_list = []
-        fields = ['', 'flag of ', 'people of ', 'culture of ']
         for country in country_str_list:
-            for field in fields:
-                query = urllib.urlencode(dict(q=field + country, format='json', t='Foodprints'))
-                response = urllib2.urlopen('https://api.duckduckgo.com?' + query)
-                d = json.load(response)
-                if d['Image'] != '':
-                    url_list.append(d['Image'])
-                    break
-            if d['Image'] == '':
-                url_list.append('could not find picture')
+            query = urllib.urlencode(dict(q='flag of ' + country, format='json', t='Foodprints'))
+            response = urllib2.urlopen('https://api.duckduckgo.com?' + query)
+            d = json.load(response)
+            if d['Image'] != '':
+                url_list.append(d['Image'])
+            else:
+                url_list.append('/staticgraphview/img/broken.png')
         option_list = zip(country_str_list, url_list)
         return render(request, 'graphview/question.html', {
             'question': "What country is your food from?",
@@ -199,7 +189,7 @@ def question(request, question_num):
         for ingredient in ingredient_list:
             ingredient_str_list.append(''.join(ingredient.ingredient_name).encode("ascii"))
         url_list = []
-        fields = ['', 'picture of ', 'people eating ']
+        fields = ['', 'picture of ']
         for idx in ingredient_str_list:
             for field in fields:
                 query = urllib.urlencode(dict(q=field + idx, format='json', t='Foodprints'))
