@@ -10,6 +10,9 @@ import urllib
 import urllib2
 import itertools
 
+def help(request):
+    return render(request, 'graphview/help.html')
+
 def get_image(recipeName):
     fields = ['', 'picture of ']
     for field in fields:
@@ -50,6 +53,7 @@ def get_recipes(request):
     fields = get_list_or_404(target_recipe.ingredients.all())
     suggestion_list = []
     spare_list = []
+    relation_list = []
     shuffle(fields)
     refinement = 0
     for idx, field in enumerate(fields):
@@ -65,10 +69,12 @@ def get_recipes(request):
                 break
             continue
         print field
+        relation_list.append(field.ingredient_name)
         recipe_list = temp_list
         refinement += 1
 
     print suggestion_list
+    relation = ', '.join(relation_list)
 
     data = {}
     data['nodes'] = [{"id" : "0", "label": target_recipe.recipe_name, "image": get_image(target_recipe.recipe_name)}]
@@ -76,7 +82,7 @@ def get_recipes(request):
 
     for idx, suggestion in enumerate(suggestion_list):
         data['nodes'].append({"id" : str(idx + 1), "label": suggestion.recipe_name, "image": get_image(suggestion.recipe_name)})
-        data['edges'].append({"id" : str(idx), "from": "0", "to": str(idx + 1)})
+        data['edges'].append({"id" : str(idx), "from": "0", "to": str(idx + 1), 'title': relation})
 
     return HttpResponse(json.dumps(data))  
 

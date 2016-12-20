@@ -1,0 +1,94 @@
+<html>
+    <head>
+        {% load static %}
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+        <title>Foodprints - An interactive foodnetwork!</title>
+
+        <!-- Bootstrap Core CSS -->
+        <link href="{% static "home/vendor/bootstrap/css/bootstrap.min.css" %}" rel="stylesheet">
+
+        <!-- Theme CSS -->
+        <link href="{% static "home/css/index.css" %}" rel="stylesheet">
+
+        <!-- Custom Fonts -->
+        <link href="{% static "home/vendor/font-awesome/css/font-awesome.min.css" %}" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+    </head>
+
+    <body id="page-top" class="index">
+        <!-- Navigation -->
+        <nav id="mainNav" class="navbar navbar-default navbar-fixed-top navbar-custom">
+            <div class="container">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header page-scroll">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span> Menu <i class="fa fa-bars"></i>
+                    </button>
+                    <a class="navbar-brand" href="{% url 'home:index' %}">Foodprints</a>
+                </div>
+            </div>
+            <!-- /.container-fluid -->
+        </nav>
+        <section>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 text-center">
+                        <h2>Tutorial</h2></br>
+                        <hr class="star-primary">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-lg-offset-2">
+                        <p>Since you have come this far that means you have already selected a food! 
+                        First off the food network is meant for you to explore, so feel free to click on everything and ignore this tutorial.</p>
+                        
+                        <p>However you may still be left with questions. In that case continue in this tutorial.</p>
+                        <p>There is three different entry points to enter the food network:</p>
+                        <p>
+                        1. You take the questionnaire and end up on specific food that you already like.<br/>
+                        2. You click the random button and enter at a random point. <br/>
+                        3. You pick from a a list of available dishes in the list everything section. <br/>
+                         <p>No matter which option you chose you will end up on the network. Also it should be noted that at any point
+                        these options are available at the left hand side of the screen.</p>                       </p>
+                    </div>
+                    <div class="col-lg-4">
+                        <p>The currently selected dish is displayed in the middle, slightly larger than the other images with the arrows pointing outwards.
+                        Related dishes are ordered in a fan pattern around this dish. You can click these at any time to make them the currently selected dish and show suggestions. 
+                        When hovering over the arrows you can check which relation these two dishes hold (to be implemented).
+                        On the right hand side more information about the currently selected dish is diplayed, such as the ingredients, a picture if available, the country of origin and a link to the source recipe!</p>
+
+                        <p>We hope that with this information you can resume on your journey and find something of your liking!</p>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Scroll to Top Button (Only visible on small and extra-small screen sizes) -->
+        <div class="scroll-top page-scroll hidden-sm hidden-xs hidden-lg hidden-md">
+            <a class="btn btn-primary" href="#page-top">
+                <i class="fa fa-chevron-up"></i>
+            </a>
+        </div>
+
+        <!-- jQuery -->
+        <script src="{% static "/home/vendor/jquery/jquery.min.js" %}" ></script>
+
+        <!-- Bootstrap Core JavaScript -->
+        <script src="{% static "/home/vendor/bootstrap/js/bootstrap.min.js" %}" ></script>
+
+        <!-- Plugin JavaScript -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+
+        <!-- Theme JavaScript -->
+        <script src="{% static "/home/js/freelancer.min.js" %}"></script>
+
+    </body>
+</html>

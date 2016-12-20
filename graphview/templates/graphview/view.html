@@ -126,8 +126,9 @@
                 },
                 interaction: {
                     dragView: false,
-                    zoomView: false
-                }
+                    zoomView: false,
+                    tooltipDelay: 1,
+                },
             };
             network = new vis.Network(container, data, options);
             network.selectNodes([0]);
@@ -219,7 +220,7 @@
             <a href="{% url 'graphview:add_recipe' %}" data-toggle="tooltip" title="Add your own dish!">
                 <img src ="{% static 'home/img/Ans-02.jpg' %}" class="img-responsive" style="margin-top: 8px; border-top-right-radius: 5px; border-bottom-right-radius: 5px">
             </a>
-            <a href="{% url 'graphview:all_recipes' %}" data-toggle="tooltip" title="Help!">
+            <a href="{% url 'graphview:help' %}" data-toggle="tooltip" title="Help!">
                 <img src ="{% static 'home/img/Ans-00.jpg' %}" class="img-responsive" style="margin-top: 8px; border-top-right-radius: 5px; border-bottom-right-radius: 5px">
             </a>
         </div>
