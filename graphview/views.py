@@ -38,7 +38,7 @@ def get_info(request):
     info['recipe'] = recipe.recipe_name
     info['color'] = recipe.color
     info['country_of_origin'] = recipe.country_of_origin
-    info['link'] = 'http://www.bbcgoodfood.com'
+    info['link'] = recipe.link
     info['ingredients'] = []
     ingredient_obj_list = recipe.ingredients.all()
     for ingredient in ingredient_obj_list:

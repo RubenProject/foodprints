@@ -51,6 +51,7 @@ class Recipe(models.Model):
         max_length = 10, 
         choices = RECIPE_COLOR_CHOICES,
     )
+    link = models.CharField(max_length = 500, default = 'empty')
     ingredients = models.ManyToManyField(Ingredient)
     
     def __str__(self):
