@@ -41,9 +41,8 @@
 
     <script type="text/javascript">
         var nodes, edges, network, focusedNode, imgURL;
-        var networkStack = new Array();
+        var graphStack = new Array();
         var infoStack = new Array();
-        var doubleDelete = true;
         var containerHeight, containerWidth;
 
         // convenience method to stringify a JSON object
@@ -68,6 +67,7 @@
         }
 
         function updateInfo(info){
+            infoStack.push(info);
             var container = document.getElementById('infoContainer');
             document.getElementById('foodTitle').innerHTML = info.recipe;
             document.getElementById('foodImg').innerHTML = "<img src=\x22" + info.image + "\x22/ style=\x22width=100%; border-radius: 5px; border: 2px solid gray\x22>";
@@ -82,16 +82,16 @@
         }
 
         function undo(){
-            if (doubleDelete){
+            if (infoStack.length > 1 && graphStack.length > 1){
+                graphStack.pop();
+                updateGraph(graphStack.pop());
                 infoStack.pop();
-                doubleDelete = false;
-            }
-            if (networkStack.length > 0 && infoStack.length > 0){
                 updateInfo(infoStack.pop());
             }
         }
 
         function updateGraph(graphArray){
+            graphStack.push(graphArray);
             document.getElementById('relContainer').innerHTML = "<h4>Hover over the arrows to see the common ingredients!</h4>";
             //create an array with nodes
             nodes = new vis.DataSet();
@@ -158,7 +158,6 @@
                 params.event = "[original event]";
                 document.getElementById('relContainer').innerHTML = "<h4>The mutual ingredients between these dishes are: " + JSON.stringify(graphArray.relation , null, 4) + "</h4>";
             });
-            networkStack.push(network);
         }
 
         function draw(recipe) {
@@ -188,14 +187,12 @@
             xmlhttp2.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     var myObj = JSON.parse(this.responseText);
-                    infoStack.push(myObj);
                     updateInfo(myObj);
                 }
             };
             xmlhttp2.open("GET", url, true);
             xmlhttp2.setRequestHeader("recipe", focusedNode);
             xmlhttp2.send();
-            doubleDelete = true;
         }
 
     </script>
