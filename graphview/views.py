@@ -79,6 +79,7 @@ def get_recipes(request):
     data = {}
     data['nodes'] = [{"id" : "0", "label": target_recipe.recipe_name, "image": get_image(target_recipe.recipe_name)}]
     data['edges'] = []
+    data['relation'] = relation
 
     for idx, suggestion in enumerate(suggestion_list):
         data['nodes'].append({"id" : str(idx + 1), "label": suggestion.recipe_name, "image": get_image(suggestion.recipe_name)})

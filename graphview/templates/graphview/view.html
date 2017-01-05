@@ -137,8 +137,13 @@
                 var clickedNodes = nodes.get(ids);
                 if (clickedNodes[0].label != focusedNode){
                     focusedNode = clickedNodes[0].label;
+                    document.getElementById('relContainer').innerHTML = "<h4>Hover over the arrows to see the common ingredients!</h4>";
                     draw(clickedNodes[0].label);
                 }
+            });
+            network.on( 'showPopup', function (params) {
+                params.event = "[original event]";
+                document.getElementById('relContainer').innerHTML = "<h4>The mutual ingredients between these dishes are: " + JSON.stringify(graphArray.relation , null, 4) + "</h4>";
             });
         }
 
@@ -228,9 +233,19 @@
           style="overflow:hidden;
             float: left;
             width: 65%;
-            height: 89vh;
+            height: 85vh;
             margin: 0;
             background:url( '{% static 'graphview/img/grid.gif' %}' )">
+        </div>
+        <div id="relContainer"
+          style="overflow:hidden;
+            float: left;
+            width: 65%;
+            height: 4vh;
+            margin 0;
+            padding-left: 10px;
+            border-style: dotted dashed dashed dashed">
+            <h4>Hover over the arrows to see the common ingredients!</h4>
         </div>
         <div id="infoContainer"
           style="overflow-y: scroll;
