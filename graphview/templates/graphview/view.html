@@ -41,6 +41,9 @@
 
     <script type="text/javascript">
         var nodes, edges, network, focusedNode, imgURL;
+        var networkStack = new Array();
+        var infoStack = new Array();
+        var doubleDelete = true;
         var containerHeight, containerWidth;
 
         // convenience method to stringify a JSON object
@@ -78,7 +81,18 @@
             document.getElementById('foodIngrList').innerHTML = infoText;
         }
 
+        function undo(){
+            if (doubleDelete){
+                infoStack.pop();
+                doubleDelete = false;
+            }
+            if (networkStack.length > 0 && infoStack.length > 0){
+                updateInfo(infoStack.pop());
+            }
+        }
+
         function updateGraph(graphArray){
+            document.getElementById('relContainer').innerHTML = "<h4>Hover over the arrows to see the common ingredients!</h4>";
             //create an array with nodes
             nodes = new vis.DataSet();
             //seems to cause some sort of slowdown?
@@ -137,7 +151,6 @@
                 var clickedNodes = nodes.get(ids);
                 if (clickedNodes[0].label != focusedNode){
                     focusedNode = clickedNodes[0].label;
-                    document.getElementById('relContainer').innerHTML = "<h4>Hover over the arrows to see the common ingredients!</h4>";
                     draw(clickedNodes[0].label);
                 }
             });
@@ -145,6 +158,7 @@
                 params.event = "[original event]";
                 document.getElementById('relContainer').innerHTML = "<h4>The mutual ingredients between these dishes are: " + JSON.stringify(graphArray.relation , null, 4) + "</h4>";
             });
+            networkStack.push(network);
         }
 
         function draw(recipe) {
@@ -174,12 +188,14 @@
             xmlhttp2.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     var myObj = JSON.parse(this.responseText);
+                    infoStack.push(myObj);
                     updateInfo(myObj);
                 }
             };
             xmlhttp2.open("GET", url, true);
             xmlhttp2.setRequestHeader("recipe", focusedNode);
             xmlhttp2.send();
+            doubleDelete = true;
         }
 
     </script>
@@ -237,6 +253,9 @@
             margin: 0;
             background:url( '{% static 'graphview/img/grid.gif' %}' )">
         </div>
+        <button id="backBtn" type="button" onclick="undo()" style="position: absolute; top: 12.5vh; left: 67%; width: 100px; height: 100px">
+            <img src="{% static 'graphview/img/undoBtn.png' %}" class="img-responsive"/>
+        </button> 
         <div id="relContainer"
           style="overflow:hidden;
             float: left;
